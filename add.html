@@ -1,0 +1,109 @@
+<!DOCTYPE html >
+  <head>
+    
+    <title>Google Maps JavaScript API Example: Map Simple</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDmkOsyqpV0uDdAT0BzWkEgdTbfsRQZq8k"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+    var marker;
+    var infowindow;
+
+    function initialize() {
+      navigator.geolocation.getCurrentPosition(onSuccess, onError, { timeout: 30000 });
+function onSuccess(position) {
+var lat=position.coords.latitude;
+var lang=position.coords.longitude;
+var pyrmont = new google.maps.LatLng(lat,lang);
+      var options = {
+        zoom: 15,
+        center: pyrmont
+      }
+      var map = new google.maps.Map(document.getElementById("map"), options);
+      var html = "<table>" +
+                 "<tr><td>Name:</td> <td><input type='text' id='name'/> </td> </tr>" +
+                 "<tr><td>Address:</td> <td><input type='text' id='address'/></td> </tr>" +
+                 "<tr><td>Type:</td> <td><select id='type'>" +
+                 "<option value='atm' SELECTED>atm</option>" +
+                 "<option value='restaurant'>restaurant</option>" +
+                 "</select> </td></tr>" +
+                 "<tr><td></td><td><input type='button' value='Save' onclick='saveData()'/></td></tr>";
+    infowindow = new google.maps.InfoWindow({
+     content: html
+    });
+
+    google.maps.event.addListener(map, "click", function(event) {
+        marker = new google.maps.Marker({
+          position: event.latLng,
+          map: map
+        });
+        google.maps.event.addListener(marker, "click", function() {
+          infowindow.open(map, marker);
+        });
+    });
+    }
+	}
+	
+	function onError(error) {
+alert('code: ' + error.code + '\n' +
+'message: ' + error.message + '\n');
+}
+
+    function saveData() {
+      var name = escape(document.getElementById("name").value);
+      var address = escape(document.getElementById("address").value);
+      var type = document.getElementById("type").value;
+      var latlng = marker.getPosition();
+
+      var url = "phpsqlinfo_addrow.php?name=" + name + "&address=" + address +
+                "&type=" + type + "&lat=" + latlng.lat() + "&lng=" + latlng.lng();
+      downloadUrl(url, function(data, responseCode) {
+        if (responseCode == 200 && data.length >= 1) {
+          infowindow.close();
+          document.getElementById("message").innerHTML = "Location added.";
+        }
+      });
+    }
+
+    function downloadUrl(url, callback) {
+      var request = window.ActiveXObject ?
+          new ActiveXObject('Microsoft.XMLHTTP') :
+          new XMLHttpRequest;
+
+      request.onreadystatechange = function() {
+        if (request.readyState == 4) {
+          request.onreadystatechange = doNothing;
+          callback(request.responseText, request.status);
+        }
+      };
+
+      request.open('GET', url, true);
+      request.send(null);
+    }
+
+    function doNothing() {}
+    </script>
+  </head>
+
+  <body style="margin:0px; padding:0px;" onload="initialize()">
+  
+  	<nav class="navbar navbar-default" >
+  <div class="container-fluid" style="background-color:pink">
+   
+    <ul class="nav navbar-nav" >
+      <li><a href="#admin">Home</a></li>
+      <li ><a href="/loc/places/add.html">Add a place</a></li>
+      <li><a href="#bk" onclick="showbk(2);">Rooms</a></li>
+      <li><a href="#atm" onclick="showatm(1);">ATM </a></li>
+    </ul>
+  </div>
+</nav>
+  
+    <div id="map" style="width: 500px; height: 800px"></div>
+    <div id="message"></div>
+	
+	<script type="text/javascript" src="cordova.js"></script>
+			<script type="text/javascript" src="scripts/platformOverrides.js"></script>
+			<script type="text/javascript" src="scripts/index.js"></script>
+  </body>
+
+</html>
